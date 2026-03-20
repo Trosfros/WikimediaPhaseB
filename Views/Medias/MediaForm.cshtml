@@ -1,0 +1,69 @@
+﻿@model Models.Media
+
+<form class="form" action="/Medias/@ViewBag.Action" method="POST">
+    @Html.AntiForgeryToken() <!-- Injection de jeton anti contrefaçon de formulaire -->
+    <label for="Title">Titre</label>
+    <input id="Title"
+           name="Title"
+           class="form-control"
+           placeholder="Titre"
+           value="@Model.Title"
+           required
+           RequireMessage="Veuillez entrer un titre" />
+    <!-- Category -->
+    <label for="Category" class="form-label">Catégorie</label>
+    <input type="text"
+           list="Categories"
+           class="form-control Alpha"
+           name="Category"
+           id="Catgory" placeholder="Catégories"
+           value="@Model.Category"
+           required
+           RequireMessage="Veuillez entrer une catégorie"
+           InvalidMessage="La catégorie comporte un caractère illégal"
+           onfocusout="this.value = this.value.trim()" />
+    <datalist id="Categories">
+        @foreach (var category in DAL.DB.Medias.MediasCategories())
+        {
+            <option value="@category">@category</option>
+        }
+    </datalist>
+    <label for="Description" class="form-label">Description </label>
+    <textarea class="form-control"
+              name="Description"
+              id="Description"
+              placeholder="Description"
+              style="margin-bottom:8px;"
+              rows="9"
+              required
+              RequireMessage="Veuillez entrer une Description">@Model.Description</textarea>
+
+    <label for="YoutubeId" class="form-label">Id du media Youtube </label>
+    <i class="cmdIconSmall fa fa-info-circle" title="À propos du Id Youtube"
+       onclick="bootbox.alert(
+       `À propos du <b>Id Youtube</b> <hr />
+        Copiez et collez l'URL du vidéo ou uniquement son id. <br /><br />
+        Par exemple : <br />
+        <b>https://www.youtube.com/watch?v=XYZ12345 </b><br />
+        ou <br>
+        <b>XYZ12345</b>`)">
+    </i>
+    <input id="YoutubeId" name="YoutubeId"
+           class="form-control" placeholder="Id youtube" value="@Model.YoutubeId"
+           required
+           RequireMessage="Veuillez entrer un id du media Youtube"
+           CustomErrorMessage="Cet id est déjà utilisé" />
+    <div style="display:flex; align-items:center; margin: 10px 0;">
+        <input type="checkbox"
+               id="Shared"
+               name="Shared"
+               value="true"
+               @(Model.Shared ? "checked" : "")
+               style="width:20px; height:20px; cursor:pointer;" />
+        <label for="Shared" style="margin-left:10px; cursor:pointer;">Partager la vidéo</label>
+        <input type="hidden" name="Shared" value="false" />
+    </div>
+    
+    <img id="previewThumbnail" class="mediaThumbnailBig" src="https://img.youtube.com/vi/@Model.YoutubeId/mqdefault.jpg" loading="lazy">
+    <input id="submit" type="submit" value="Enregistrer" class="btn btn-primary" style="display:none">
+</form>

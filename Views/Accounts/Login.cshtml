@@ -1,0 +1,96 @@
+﻿@model Models.LoginCredential
+
+@{
+    ViewBag.Title = "Connexion";
+
+    // On s'assure que ce n'est pas null
+    string currentLoginEmail = Session["currentLoginEmail"] as string ?? "";
+    string eventMessage = Session["LoginMessage"] as string ?? "";
+    
+    // Si la session est vide, on considère que c'est un succès (neutre) par défaut
+    bool eventSuccess = Session["LoginSuccess"] != null ? (bool)Session["LoginSuccess"] : true;
+
+    string messageColor = eventSuccess ? "green" : "red";
+    
+    // Icônes : cercle-coché pour succès, triangle-attention pour erreur
+    string alertIcon = eventSuccess ? "fa-circle-check" : "fa-triangle-exclamation";
+    
+    ViewBag.PageTitle = "Application Web";
+}
+<br />
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.TimeZoneOffset)
+
+    <div class="event-form">
+
+        @* Remplace ton @if (eventMessage != "") par celui-ci *@
+@if (!string.IsNullOrWhiteSpace(eventMessage))
+{
+    <fieldset style="border: 1px solid @messageColor; border-radius: 5px; margin-bottom: 10px;">
+        <legend>
+            <i class="fa-solid @alertIcon" style="color:@messageColor; font-size:20px;"></i>
+        </legend>
+        <div style="text-align:left !important; padding: 5px;">
+            <span style="color:@messageColor; font-weight:bold;">@eventMessage</span>
+        </div>
+    </fieldset>
+}
+
+        <fieldset>
+            <legend>Connexion</legend>
+            <input name="Email" id="Email"
+                   class="form-control Email"
+                   placeholder="Courriel"
+                   required
+                   RequireMessage="Veuillez entrer votre adresse de courriel"
+                   InvalidMessage="Courriel invalide"/>
+            <div class="passwordLayout">
+                <input name="Password" id="Password"
+                       class="form-control"
+                       type="password"
+                       placeholder="Mot de passe"
+                       required
+                       RequireMessage="Veuillez entrer votre mot de passe" />
+                <i id="toggleShowPassword" class="passwordShowIcon fa fa-eye" title="Afficher/Masquer le mot de passe"></i>
+               
+            </div>
+
+            <input id="submit" 
+                   type="submit" 
+                   value="Se connecter..." 
+                   class="btn btn-primary" />
+        </fieldset>
+        @Html.ActionLink("S'enregistrer...", "Subscribe")
+        @Html.ActionLink("Mot de passe oublié...", "RenewPasswordCommand")
+    </div>
+}
+@section Scripts {
+
+    <script>
+        $(() => {
+            initFormValidation();
+            // noTimeout();
+            // initSessionTimeout(1500 * 60 /*seconds*/);
+            // Set client local time zone
+            $("#TimeZoneOffset").val(new Date().getTimezoneOffset() / 60);
+
+            if ($("#Password").val() == "")
+                $("#toggleShowPassword").hide();
+            else
+                $("#toggleShowPassword").show();
+            $("#toggleShowPassword").click(() => {
+                $("#Password").attr("type", $("#Password").attr("type") == 'password' ? 'text' : 'password');
+                $("#toggleShowPassword").toggleClass("fa-eye");
+                $("#toggleShowPassword").toggleClass("fa-eye-slash");
+            });
+            $("#Password").keyup(() => {
+                if ($("#Password").val() == "")
+                    $("#toggleShowPassword").hide();
+                else
+                    $("#toggleShowPassword").show();
+            })
+        })
+    </script>
+}

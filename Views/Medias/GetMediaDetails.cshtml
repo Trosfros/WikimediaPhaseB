@@ -1,0 +1,74 @@
+﻿@model Models.Media
+@{
+    var currentUser = Models.User.ConnectedUser;
+
+    // 1. Droit de MODIFIER/SUPPRIMER (Proprio OU Admin)
+    bool isAuthorized = currentUser != null && (Model.OwnerId == currentUser.Id || currentUser.IsAdmin);
+
+    // 2. Droit de VOIR
+    // L'Admin passe ici même si Shared est false car isAuthorized est true
+    bool canView = Model.Shared || isAuthorized;
+
+    var creator = DAL.DB.Users.Get(Model.OwnerId);
+    bool showSharedTag = currentUser != null && Model.OwnerId == currentUser.Id && Model.Shared;
+}
+
+@if (Model == null)
+{
+    <div>Média introuvable.</div>
+}
+else if (!canView)
+{
+    <div style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 10px; display: flex; align-items: center; font-weight: bold;">
+        <i class="fa fa-exclamation-triangle" style="margin-right: 10px; font-size: 1.2em;"></i>
+        <span>Ce média n'est plus partagé par son propriétaire.</span>
+    </div>
+}
+else
+{
+    @* Note pour l'admin si la vidéo est privée *@
+    if (!Model.Shared && currentUser != null && currentUser.IsAdmin)
+    {
+        <div style="color: orange; font-weight: bold; margin-bottom: 5px;">[Mode Admin - Vidéo non partagée]</div>
+    }
+    else if (showSharedTag)
+    {
+        <div style="color: gray; font-weight: bold; margin-bottom: 5px;">[Partagé]</div>
+    }
+
+    <dl>
+        <dt style="font-size: 1.3em; font-weight: bold; color: black; margin-bottom: 10px;">@Model.Title</dt>
+        <dd>@Helper.YoutubePlayer(Model.YoutubeId)</dd>
+
+        <dd class="description" style="margin-top: 10px;">@Model.Description</dd>
+
+        <dt style="color: gray; font-size: 0.9em; margin-top: 15px;">Catégorie</dt>
+        <dd style="font-weight: bold; color: black;">@Model.Category</dd>
+
+        @if (creator != null)
+        {
+            <dt style="color: gray; font-size: 0.9em; margin-top: 10px;">Ajouté par</dt>
+            <dd style="display: flex; align-items: center; margin-top: 5px;">
+                <img src="@creator.Avatar" style="width:35px; height:35px; border-radius:50%; margin-right:10px; object-fit: cover;" />
+                <span style="font-weight: bold; color: black;">@creator.Name</span>
+            </dd>
+        }
+    </dl>
+}
+
+<script>
+    $(() => {
+        function hideUnauthorizedIcons() {
+            // On ne cache les icônes QUE si l'utilisateur n'est pas autorisé (ni proprio, ni admin)
+            @if (!isAuthorized) {
+                <text>
+                $('a[href*="/Medias/Edit"]').remove();
+                $('a[href*="/Medias/Delete"]').remove();
+                $(".fa-edit, .fa-trash, .fa-trash-can, .fa-pen-to-square").remove();
+                </text>
+            }
+        }
+        hideUnauthorizedIcons();
+        setTimeout(hideUnauthorizedIcons, 200); // Un peu plus de délai pour être sûr
+    });
+</script>

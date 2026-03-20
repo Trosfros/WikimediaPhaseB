@@ -1,0 +1,77 @@
+﻿@using Models
+@model IEnumerable<Models.Media>
+
+@if (Model != null && Model.Any())
+{
+    foreach (var media in Model)
+    {
+        var currentUser = Models.User.ConnectedUser;
+
+        // On force la récupération de l'owner
+        Models.User owner = media.Owner;
+
+        var ownerName = (owner != null && !string.IsNullOrEmpty(owner.Name)) ? owner.Name : "Utilisateur anonyme";
+        var ownerAvatar = (owner != null && !string.IsNullOrEmpty(owner.Avatar)) ? owner.Avatar : "/App_Assets/Users/no_avatar.png";
+
+        <div class="mediaLayout" style="position: relative;">
+
+            @* Avatar du créateur *@
+            <a href="/Medias/List?userId=@media.OwnerId" title="Vidéos de @ownerName">
+                <img src="@ownerAvatar"
+                     class="UserAvatarSmall"
+                     style="position: absolute;
+                            top: 5px;
+                            right: 5px;
+                            width: 35px;
+                            height: 35px;
+                            border-radius: 50%;
+                            border: 2px solid white;
+                            z-index: 10;
+                            object-fit: cover;" />
+            </a>
+
+            @if (currentUser != null && media.OwnerId == currentUser.Id && media.Shared)
+            {
+                <div style="position: absolute;
+                top: 5px;
+                right: 45px;
+                width: 38px;
+                height: 38px;
+                background-color: rgba(255, 255, 255, 0.5);
+                border-radius: 35px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10;
+                box-shadow: 0 0 4px rgba(0,0,0,0.2);">
+
+                    <img src="/Content/ui-images/shared.png"
+                         title="Partagé"
+                         style="width: 26px;
+                    height: 26px;
+                    object-fit: contain;" />
+                </div>
+            }
+
+            @* Thumbnail de la vidéo *@
+            <a href="/Medias/Details/@media.Id" title="Voir les détails" style="text-decoration:none; width:100% !important">
+                <div class="mediaThumbnail"
+                     style="background-image:url('https://img.youtube.com/vi/@media.YoutubeId/mqdefault.jpg');">
+                </div>
+            </a>
+
+            @* Infos de la vidéo *@
+            <div class="ellipsis" style="margin-left: 4px; margin-right: 4px; font-size: 0.8em; font-weight: bold; color: black;">
+                @media.Title
+            </div>
+            <div style="margin-left: 4px; color: gray; font-size: 0.65em">
+                @media.Category <br />
+                @Helper.When(media.PublishDate)
+            </div>
+        </div>
+    }
+}
+else
+{
+    <h3>Aucun résultat</h3>
+}
