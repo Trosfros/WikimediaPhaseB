@@ -1,69 +1,114 @@
-﻿@model Models.Media
+@model Models.Media
 
-<form class="form" action="/Medias/@ViewBag.Action" method="POST">
-    @Html.AntiForgeryToken() <!-- Injection de jeton anti contrefaçon de formulaire -->
-    <label for="Title">Titre</label>
-    <input id="Title"
-           name="Title"
-           class="form-control"
-           placeholder="Titre"
-           value="@Model.Title"
-           required
-           RequireMessage="Veuillez entrer un titre" />
-    <!-- Category -->
-    <label for="Category" class="form-label">Catégorie</label>
-    <input type="text"
-           list="Categories"
-           class="form-control Alpha"
-           name="Category"
-           id="Catgory" placeholder="Catégories"
-           value="@Model.Category"
-           required
-           RequireMessage="Veuillez entrer une catégorie"
-           InvalidMessage="La catégorie comporte un caractère illégal"
-           onfocusout="this.value = this.value.trim()" />
-    <datalist id="Categories">
-        @foreach (var category in DAL.DB.Medias.MediasCategories())
-        {
-            <option value="@category">@category</option>
-        }
-    </datalist>
-    <label for="Description" class="form-label">Description </label>
-    <textarea class="form-control"
-              name="Description"
-              id="Description"
-              placeholder="Description"
-              style="margin-bottom:8px;"
-              rows="9"
-              required
-              RequireMessage="Veuillez entrer une Description">@Model.Description</textarea>
+<form class="form" action="/Medias/@ViewBag.Action" method="POST" id="MediaForm">
+    @Html.AntiForgeryToken()
 
-    <label for="YoutubeId" class="form-label">Id du media Youtube </label>
-    <i class="cmdIconSmall fa fa-info-circle" title="À propos du Id Youtube"
-       onclick="bootbox.alert(
-       `À propos du <b>Id Youtube</b> <hr />
-        Copiez et collez l'URL du vidéo ou uniquement son id. <br /><br />
-        Par exemple : <br />
-        <b>https://www.youtube.com/watch?v=XYZ12345 </b><br />
-        ou <br>
-        <b>XYZ12345</b>`)">
-    </i>
-    <input id="YoutubeId" name="YoutubeId"
-           class="form-control" placeholder="Id youtube" value="@Model.YoutubeId"
-           required
-           RequireMessage="Veuillez entrer un id du media Youtube"
-           CustomErrorMessage="Cet id est déjà utilisé" />
-    <div style="display:flex; align-items:center; margin: 10px 0;">
-        <input type="checkbox"
-               id="Shared"
-               name="Shared"
-               value="true"
-               @(Model.Shared ? "checked" : "")
-               style="width:20px; height:20px; cursor:pointer;" />
-        <label for="Shared" style="margin-left:10px; cursor:pointer;">Partager la vidéo</label>
-        <input type="hidden" name="Shared" value="false" />
-    </div>
-    
-    <img id="previewThumbnail" class="mediaThumbnailBig" src="https://img.youtube.com/vi/@Model.YoutubeId/mqdefault.jpg" loading="lazy">
+    @* --- TITRE --- *@
+    <fieldset style="border: 1px solid #ccc; border-radius: 5px; padding: 0 10px 10px 10px; margin-bottom: 15px;">
+        <legend style="width: auto; padding: 0 5px; font-size: 0.9em; color: gray; margin-bottom: 0;">Titre</legend>
+        <input id="Title"
+               name="Title"
+               class="form-control"
+               placeholder="Titre"
+               value="@Model.Title"
+               required
+               style="border: 1px solid #ccc; width: 100%;" />
+    </fieldset>
+
+    @* --- CATÉGORIE --- *@
+    <fieldset style="border: 1px solid #ccc; border-radius: 5px; padding: 0 10px 10px 10px; margin-bottom: 15px;">
+        <legend style="width: auto; padding: 0 5px; font-size: 0.9em; color: gray; margin-bottom: 0;">Catégorie</legend>
+        <input type="text"
+               list="Categories"
+               class="form-control Alpha"
+               name="Category"
+               id="Category"
+               placeholder="Catégories"
+               value="@Model.Category"
+               required
+               style="border: 1px solid #ccc; width: 100%;"
+               onfocusout="this.value = this.value.trim()" />
+        <datalist id="Categories">
+            @foreach (var category in DAL.DB.Medias.MediasCategories())
+            {
+                <option value="@category">@category</option>
+            }
+        </datalist>
+    </fieldset>
+
+    @* --- DESCRIPTION --- *@
+    <fieldset style="border: 1px solid #ccc; border-radius: 5px; padding: 0 10px 10px 10px; margin-bottom: 15px;">
+        <legend style="width: auto; padding: 0 5px; font-size: 0.9em; color: gray; margin-bottom: 0;">Description</legend>
+        <textarea class="form-control"
+                  name="Description"
+                  id="Description"
+                  placeholder="Description"
+                  rows="8"
+                  required
+                  style="border: 1px solid #ccc; width: 100%; resize: vertical;">@Model.Description</textarea>
+    </fieldset>
+
+    @* --- ID YOUTUBE (Avec l'alerte Bootbox formatée) --- *@
+    <fieldset style="border: 1px solid #ccc; border-radius: 5px; padding: 0 10px 10px 10px; margin-bottom: 10px;">
+        <legend style="width: auto; padding: 0 5px; font-size: 0.9em; color: gray; margin-bottom: 0;">
+            Id du media Youtube
+            <i class="cmdIconSmall fa fa-info-circle" style="cursor:pointer; color: #555;" title="Aide"
+               onclick="bootbox.alert({
+               title: 'À propos du <b>Id Youtube</b>' ,
+               message: 'Copiez et collez l\' URL du vidéo ou uniquement son id. <br /><br /> ' +
+                         'Par exemple : <br /> ' +
+                         '<b>https://www.youtube.com/watch?v=XYZ12345</b> <br /> ' +
+                         'ou <br /> ' +
+                         '<b>XYZ12345</b>',
+                backdrop: true
+           })"></i>
+        </legend>
+
+        <input id="YoutubeId" name="YoutubeId"
+               class="form-control"
+               placeholder="Id youtube"
+               value="@Model.YoutubeId"
+               required
+               RequireMessage="Veuillez entrer un id du media Youtube"
+               CustomErrorMessage="Cet id est déjà utilisé"
+               url="/Medias/YoutubeIdAvailable?id=@Model.Id"
+               style="border: 1px solid #ccc; width: 100%; margin-bottom: 10px;" />
+
+        <div style="text-align: center; background-color: #f0f0f0; border-radius: 5px; height: 180px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <img id="previewThumbnail"
+                 src="https://img.youtube.com/vi/@(string.IsNullOrEmpty(Model.YoutubeId) ? "0" : Model.YoutubeId)/mqdefault.jpg"
+                 style="width: 100%; height: 100%; object-fit: cover;"
+                 onerror="this.src='/Content/ui-images/no_video.png'">
+        </div>
+    </fieldset>
+    @* --- PARTAGE --- *@
+    <fieldset style="border: 1px solid #ccc; border-radius: 5px; padding: 0 10px 10px 10px; margin-bottom: 15px;">
+        <legend style="width: auto; padding: 0 5px; font-size: 0.9em; color: gray; margin-bottom: 0;">Partage</legend>
+        <div style="display:flex; align-items:center; padding: 5px 0;">
+            <input type="checkbox"
+                   id="Shared"
+                   name="Shared"
+                   value="true"
+                   @(Model.Shared ? "checked" : "")
+                   style="width:18px; height:18px; cursor:pointer;" />
+            <label for="Shared" style="margin-left:10px; cursor:pointer; font-weight: bold; margin-bottom: 0;">Activé</label>
+            <input type="hidden" name="Shared" value="false" />
+        </div>
+    </fieldset>
+
     <input id="submit" type="submit" value="Enregistrer" class="btn btn-primary" style="display:none">
 </form>
+
+<script>
+    $(() => {
+        // Mise à jour de l'aperçu quand on change l'ID Youtube
+        $('#YoutubeId').on('input', function () {
+            let id = $(this).val().trim();
+            // Petite logique pour extraire l'ID si c'est une URL complète
+            if (id.includes('v=')) id = id.split('v=')[1].split('&')[0];
+            if (id.includes('youtu.be/')) id = id.split('youtu.be/')[1].split('?')[0];
+
+            $('#previewThumbnail').attr('src', `https://img.youtube.com/vi/${id}/mqdefault.jpg`);
+        });
+    });
+</script>
